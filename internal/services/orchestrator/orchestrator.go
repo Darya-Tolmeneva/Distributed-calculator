@@ -70,6 +70,7 @@ func GetTaskResult(result models.Result) {
 func evaluateExpression(expression models.Expression) (float64, error) {
 	ch := checker.ExpressionChecker{}
 	if err := checker.ValidateExpression(ch, expression.Expr); err != nil {
+		updateExpressionStatus(expression.ID, "failed", float64(0))
 		return 0, fmt.Errorf("invalid expression: %v", err)
 	}
 	log.Println("Check expression")
@@ -85,6 +86,7 @@ func evaluateExpression(expression models.Expression) (float64, error) {
 		}
 		if len(token) == 1 && checker.IsOperator(rune(token[0])) {
 			if len(stack) < 2 {
+				updateExpressionStatus(expression.ID, "failed", float64(0))
 				return 0, models.ErrNotEnoughOperands
 			}
 			b := stack[len(stack)-1]
@@ -92,6 +94,7 @@ func evaluateExpression(expression models.Expression) (float64, error) {
 			stack = stack[:len(stack)-2]
 
 			if rune(token[0]) == '/' && b == 0 {
+				updateExpressionStatus(expression.ID, "failed", float64(0))
 				return 0, models.ErrDivisionByZero
 			}
 			task := &models.Task{
@@ -106,6 +109,7 @@ func evaluateExpression(expression models.Expression) (float64, error) {
 			err := evaluateTask(task)
 
 			if err != nil {
+				updateExpressionStatus(expression.ID, "failed", float64(0))
 				return 0, fmt.Errorf("failed to evaluate task: %v", err)
 			}
 			result := task.Result

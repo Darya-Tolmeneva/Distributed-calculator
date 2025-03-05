@@ -38,7 +38,6 @@ func parseDuration(envVar string, defaultValue time.Duration) time.Duration {
 	return time.Duration(value) * time.Millisecond
 }
 
-// compute выполняет арифметическую операцию
 func compute(task models.Task) (float64, error) {
 	var result float64
 	switch task.Operation {
@@ -63,7 +62,6 @@ func compute(task models.Task) (float64, error) {
 	return result, nil
 }
 
-// handleCompute обрабатывает входящие задачи
 func handleCompute(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -139,7 +137,6 @@ func sendResult(taskID int, result float64) error {
 	return nil
 }
 
-// Run запускает агента на указанном порту
 func Run(port string) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/compute", handleCompute)
