@@ -25,7 +25,6 @@ var (
 	previousId     int
 )
 
-// getNextAgent возвращает адрес следующего агента для распределения задач
 func getNextAgent() string {
 	mu.Lock()
 	defer mu.Unlock()
@@ -34,7 +33,6 @@ func getNextAgent() string {
 	return agent
 }
 
-// evaluateTask отправляет задачу агенту и возвращает результат
 func evaluateTask(task *models.Task) error {
 	agentAddr := getNextAgent()
 	log.Printf("Take agent %s", agentAddr)
@@ -56,17 +54,6 @@ func evaluateTask(task *models.Task) error {
 	return nil
 }
 
-func GetTaskResult(result models.Result) {
-	taskQueueMu.Lock()
-	defer taskQueueMu.Unlock()
-	for _, task := range tasks {
-		if task.ID == result.ID {
-			task.Result = result.Result
-		}
-	}
-}
-
-// evaluateExpression вычисляет выражение
 func evaluateExpression(expression models.Expression) (float64, error) {
 	ch := checker.ExpressionChecker{}
 	if err := checker.ValidateExpression(ch, expression.Expr); err != nil {
@@ -126,23 +113,6 @@ func evaluateExpression(expression models.Expression) (float64, error) {
 	return stack[0], nil
 }
 
-// Run добавляет задачу в очередь и возвращает каналы для результата и ошибки
-func Run(expression string) int {
-	previousId++
-	id := previousId
-
-	expr := models.Expression{
-		ID:     id,
-		Expr:   expression,
-		Status: "pending",
-		Result: float64(0),
-	}
-	expressions[id] = expr
-	updateExpressionStatus(id, "in_progress", float64(0))
-	evaluateExpression(expr)
-	return id
-}
-
 func updateExpressionStatus(id int, status string, result float64) {
 	expressionsMu.Lock()
 	defer expressionsMu.Unlock()
@@ -175,4 +145,30 @@ func GetExpression(id int) models.Expression {
 	}
 
 	return models.Expression{}
+}
+
+func GetTaskResult(result models.Result) {
+	taskQueueMu.Lock()
+	defer taskQueueMu.Unlock()
+	for _, task := range tasks {
+		if task.ID == result.ID {
+			task.Result = result.Result
+		}
+	}
+}
+
+func Run(expression string) int {
+	previousId++
+	id := previousId
+
+	expr := models.Expression{
+		ID:     id,
+		Expr:   expression,
+		Status: "pending",
+		Result: float64(0),
+	}
+	expressions[id] = expr
+	updateExpressionStatus(id, "in_progress", float64(0))
+	evaluateExpression(expr)
+	return id
 }

@@ -2,6 +2,9 @@ package models
 
 import (
 	"errors"
+	"log"
+	"os"
+	"strconv"
 	"time"
 )
 
@@ -41,3 +44,29 @@ var (
 	ErrDivisionByZero         = errors.New("division by zero")
 	ErrExpressionNotEvaluated = errors.New("the expression is not evaluated")
 )
+
+var (
+	TIME_ADDITION_MS        time.Duration
+	TIME_SUBTRACTION_MS     time.Duration
+	TIME_MULTIPLICATIONS_MS time.Duration
+	TIME_DIVISIONS_MS       time.Duration
+)
+
+func init() {
+	TIME_ADDITION_MS = parseDuration("TIME_ADDITION_MS", 1000*time.Millisecond)
+	TIME_SUBTRACTION_MS = parseDuration("TIME_SUBTRACTION_MS", 1000*time.Millisecond)
+	TIME_MULTIPLICATIONS_MS = parseDuration("TIME_MULTIPLICATIONS_MS", 1000*time.Millisecond)
+	TIME_DIVISIONS_MS = parseDuration("TIME_DIVISIONS_MS", 1000*time.Millisecond)
+}
+
+func parseDuration(envVar string, defaultValue time.Duration) time.Duration {
+	valueStr := os.Getenv(envVar)
+	if valueStr == "" {
+		return defaultValue
+	}
+	value, err := strconv.Atoi(valueStr)
+	if err != nil {
+		log.Fatalf("Failed to parse %s: %v", envVar, err)
+	}
+	return time.Duration(value) * time.Millisecond
+}

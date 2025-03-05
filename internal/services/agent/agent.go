@@ -7,55 +7,27 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"strconv"
 	"time"
 )
-
-var (
-	TIME_ADDITION_MS        time.Duration
-	TIME_SUBTRACTION_MS     time.Duration
-	TIME_MULTIPLICATIONS_MS time.Duration
-	TIME_DIVISIONS_MS       time.Duration
-)
-
-func init() {
-	TIME_ADDITION_MS = parseDuration("TIME_ADDITION_MS", 1000*time.Millisecond)
-	TIME_SUBTRACTION_MS = parseDuration("TIME_SUBTRACTION_MS", 1000*time.Millisecond)
-	TIME_MULTIPLICATIONS_MS = parseDuration("TIME_MULTIPLICATIONS_MS", 1000*time.Millisecond)
-	TIME_DIVISIONS_MS = parseDuration("TIME_DIVISIONS_MS", 1000*time.Millisecond)
-}
-
-func parseDuration(envVar string, defaultValue time.Duration) time.Duration {
-	valueStr := os.Getenv(envVar)
-	if valueStr == "" {
-		return defaultValue
-	}
-	value, err := strconv.Atoi(valueStr)
-	if err != nil {
-		log.Fatalf("Failed to parse %s: %v", envVar, err)
-	}
-	return time.Duration(value) * time.Millisecond
-}
 
 func compute(task models.Task) (float64, error) {
 	var result float64
 	switch task.Operation {
 	case "+":
 		result = task.Arg1 + task.Arg2
-		time.Sleep(TIME_ADDITION_MS)
+		time.Sleep(models.TIME_ADDITION_MS)
 	case "-":
 		result = task.Arg1 - task.Arg2
-		time.Sleep(TIME_SUBTRACTION_MS)
+		time.Sleep(models.TIME_SUBTRACTION_MS)
 	case "*":
 		result = task.Arg1 * task.Arg2
-		time.Sleep(TIME_MULTIPLICATIONS_MS)
+		time.Sleep(models.TIME_MULTIPLICATIONS_MS)
 	case "/":
 		if task.Arg2 == 0 {
 			return 0, fmt.Errorf("division by zero")
 		}
 		result = task.Arg1 / task.Arg2
-		time.Sleep(TIME_DIVISIONS_MS)
+		time.Sleep(models.TIME_DIVISIONS_MS)
 	default:
 		return 0, fmt.Errorf("invalid operation: %s", task.Operation)
 	}
@@ -78,13 +50,13 @@ func handleCompute(w http.ResponseWriter, r *http.Request) {
 
 	switch task.Operation {
 	case "+":
-		operationTime = TIME_ADDITION_MS
+		operationTime = models.TIME_ADDITION_MS
 	case "-":
-		operationTime = TIME_SUBTRACTION_MS
+		operationTime = models.TIME_SUBTRACTION_MS
 	case "*":
-		operationTime = TIME_MULTIPLICATIONS_MS
+		operationTime = models.TIME_MULTIPLICATIONS_MS
 	case "/":
-		operationTime = TIME_DIVISIONS_MS
+		operationTime = models.TIME_DIVISIONS_MS
 	}
 
 	response := models.Task{
