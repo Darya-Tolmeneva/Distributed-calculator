@@ -1,0 +1,16 @@
+syntax = "proto3";
+package calculator;
+
+option go_package = "./proto/gen;calculator";
+service Calculator {
+  rpc Compute (ComputeRequest) returns (ComputeResponse);
+}
+
+message ComputeRequest {
+  string operation=1;
+  repeated double operands=2;
+}
+
+message ComputeResponse {
+  double result=1;
+}
